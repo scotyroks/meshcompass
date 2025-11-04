@@ -2,7 +2,7 @@
 #include "mesh/MeshTypes.h"
 #include "mesh/NodeDB.h"
 #include "wiring.h"
-#include "main.h" // Use main.h for globals
+#include "PositionModule.h"
 
 CompassModule *compassModule;
 
@@ -30,7 +30,8 @@ int32_t CompassModule::runOnce()
 
 void CompassModule::initCompass()
 {
-    Wire.begin(sdaPin, sclPin);
+    Wire.setPins(sclPin, sdaPin);
+    Wire.begin();
     compass.init();
     LOG_INFO("Compass initialized");
 }
@@ -47,24 +48,24 @@ void CompassModule::updateLedRing()
 {
     ledRing->clear();
 
-    if (!globals.position.latitude || !globals.position.longitude)
+    if (!positionModule->getLatitude() || !positionModule->getLongitude())
         return; // No local position yet
 
-    float localLat = globals.position.latitude;
-    float localLon = globals.position.longitude;
+    float localLat = positionModule->getLatitude();
+    float localLon = positionModule->getLongitude();
     float heading = compass.getAzimuth();
 
-    for (auto const &[nodeNum, nodeInfo] : nodeDB->nodes)
+    for (auto const &node : nodeDB->getNodes())
     {
-        if (nodeInfo->position.latitude && nodeInfo->position.longitude)
+        if (node.second->position.latitude && node.second->position.longitude)
         {
-            float neighborLat = nodeInfo->position.latitude;
-            float neighborLon = nodeInfo->position.longitude;
+            float neighborLat = node.second->position.latitude;
+            float neighborLon = node.second->position.longitude;
 
             float bearing = calculateBearing(localLat, localLon, neighborLat, neighborLon);
             float relativeBearing = fmod((bearing - heading + 360), 360);
 
-            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", nodeNum, bearing, relativeBearing);
+            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", node.first, bearing, relativeBearing);
 
             int ledIndex = (int)(relativeBearing / (360.0 / ledCount));
             ledRing->setPixelColor(ledIndex, ledRing->Color(255, 0, 0)); // Red for now

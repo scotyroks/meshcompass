@@ -38,6 +38,9 @@ class PositionModule : public ProtobufModule<meshtastic_Position>, private concu
 
     void handleNewPosition();
 
+    int32_t getLatitude() { return lastGpsLatitude; }
+    int32_t getLongitude() { return lastGpsLongitude; }
+
   protected:
     /** Called to handle a particular incoming message
 
