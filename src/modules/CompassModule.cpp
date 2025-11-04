@@ -2,7 +2,6 @@
 #include "mesh/MeshTypes.h"
 #include "mesh/NodeDB.h"
 #include "wiring.h"
-#include "platform.h"
 #include "globals.h"
 
 CompassModule *compassModule;
