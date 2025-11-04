@@ -51,21 +51,22 @@ void CompassModule::updateLedRing()
     if (!positionModule->getLatitude() || !positionModule->getLongitude())
         return; // No local position yet
 
-    float localLat = positionModule->getLatitude();
-    float localLon = positionModule->getLongitude();
+    float localLat = (float)positionModule->getLatitude() / 1e7;
+    float localLon = (float)positionModule->getLongitude() / 1e7;
     float heading = compass.getAzimuth();
 
-    for (auto const &node : nodeDB->getNodes())
+    for (size_t i = 0; i < nodeDB->getNumMeshNodes(); i++)
     {
-        if (node.second->position.latitude && node.second->position.longitude)
+        meshtastic_NodeInfoLite *nodeInfo = nodeDB->getMeshNodeByIndex(i);
+        if (nodeInfo->position.latitude && nodeInfo->position.longitude)
         {
-            float neighborLat = node.second->position.latitude;
-            float neighborLon = node.second->position.longitude;
+            float neighborLat = (float)nodeInfo->position.latitude / 1e7;
+            float neighborLon = (float)nodeInfo->position.longitude / 1e7;
 
             float bearing = calculateBearing(localLat, localLon, neighborLat, neighborLon);
             float relativeBearing = fmod((bearing - heading + 360), 360);
 
-            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", node.first, bearing, relativeBearing);
+            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", nodeInfo->node_num, bearing, relativeBearing);
 
             int ledIndex = (int)(relativeBearing / (360.0 / ledCount));
             ledRing->setPixelColor(ledIndex, ledRing->Color(255, 0, 0)); // Red for now
