@@ -58,15 +58,15 @@ void CompassModule::updateLedRing()
     for (size_t i = 0; i < nodeDB->getNumMeshNodes(); i++)
     {
         meshtastic_NodeInfoLite *nodeInfo = nodeDB->getMeshNodeByIndex(i);
-        if (nodeInfo->position.latitude && nodeInfo->position.longitude)
+        if (nodeInfo->position.latitude_i && nodeInfo->position.longitude_i)
         {
-            float neighborLat = (float)nodeInfo->position.latitude / 1e7;
-            float neighborLon = (float)nodeInfo->position.longitude / 1e7;
+            float neighborLat = (float)nodeInfo->position.latitude_i / 1e7;
+            float neighborLon = (float)nodeInfo->position.longitude_i / 1e7;
 
             float bearing = calculateBearing(localLat, localLon, neighborLat, neighborLon);
             float relativeBearing = fmod((bearing - heading + 360), 360);
 
-            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", nodeInfo->node_num, bearing, relativeBearing);
+            LOG_DEBUG("Node %d: bearing=%f, relativeBearing=%f", nodeInfo->num, bearing, relativeBearing);
 
             int ledIndex = (int)(relativeBearing / (360.0 / ledCount));
             ledRing->setPixelColor(ledIndex, ledRing->Color(255, 0, 0)); // Red for now
