@@ -2,17 +2,14 @@
 #include "mesh/MeshTypes.h"
 #include "mesh/NodeDB.h"
 #include "wiring.h"
-#include "globals.h"
+#include "main.h" // Use main.h for globals
 
 CompassModule *compassModule;
 
 CompassModule::CompassModule()
 {
     compassModule = this;
-}
 
-void CompassModule::setup()
-{
     // Initialize configuration settings
     sdaPin = COMPASS_SDA_PIN;
     sclPin = COMPASS_SCL_PIN;
@@ -23,11 +20,12 @@ void CompassModule::setup()
     initLedRing();
 }
 
-void CompassModule::loop()
+int32_t CompassModule::runOnce()
 {
     compass.read();
     LOG_DEBUG("Compass heading: %d", compass.getAzimuth());
     updateLedRing();
+    return my_interval; // Return the interval for the next run
 }
 
 void CompassModule::initCompass()

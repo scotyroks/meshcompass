@@ -9,8 +9,8 @@ class CompassModule : public GenericThreadModule
 public:
     CompassModule();
 
-    void setup() override;
-    void loop() override;
+protected:
+    int32_t runOnce() override;
 
 private:
     void initCompass();
